@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Client interface {
@@ -29,7 +30,7 @@ func NewClient(logger *logrus.Logger) Client {
 	return &client{httpClient: hCli, logger: logger}
 }
 
-func (c client) SendRequest(req *http.Request) (apiResp Response, err error) {
+func (c *client) SendRequest(req *http.Request) (apiResp Response, err error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -55,7 +56,7 @@ func (c client) SendRequest(req *http.Request) (apiResp Response, err error) {
 	return apiResp, nil
 }
 
-func (c client) Close() error {
+func (c *client) Close() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
