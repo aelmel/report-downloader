@@ -14,6 +14,7 @@ import (
 type Client interface {
 	GenerateReport(ctx context.Context) (reportId string, err error)
 	GetReport(ctx context.Context, reportId string) (string, string, error)
+	DownloadReport(reportAddress string) (*http.Response, error)
 	Close() error
 }
 
@@ -58,7 +59,7 @@ func (c *client) GenerateReport(ctx context.Context) (reportId string, err error
 
 func (c *client) GetReport(ctx context.Context, reportId string) (string, string, error) {
 	path := c.buildUrl(fmt.Sprintf("generation/reports/%s", reportId))
-	req, err := http.NewRequest("POST", path, nil)
+	req, err := http.NewRequest("GET", path, nil)
 	if err != nil {
 		c.logger.Warnf("could not create request %v", err)
 		return "", "", err
@@ -72,6 +73,16 @@ func (c *client) GetReport(ctx context.Context, reportId string) (string, string
 	}
 
 	return resp.ReportUrl, resp.Status, nil
+}
+
+func (c *client) DownloadReport(reportAddress string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", reportAddress, nil)
+	if err != nil {
+		c.logger.Warnf("error %s creating request %s", reportAddress, err.Error())
+		return nil, err
+	}
+
+	return c.api.SendDownloadRequest(req)
 }
 
 func (c *client) buildUrl(resource string) string {

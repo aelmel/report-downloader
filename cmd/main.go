@@ -16,7 +16,8 @@ import (
 func main() {
 	var (
 		baseUrl         = flag.String("API_URL", "http://localhost:12345", "api host")
-		parallelClients = flag.Int("API_CLIENTS", 2, "parallel clients")
+		parallelClients = flag.Int("API_CLIENTS", 2, "parallel clients for report generator")
+		frequency       = flag.String("GENERATE_FREQUENCY", "*/1 * * * * *", "frequency calling report generator")
 	)
 
 	flag.Parse()
@@ -32,7 +33,7 @@ func main() {
 	})
 
 	reportCli, err := report.NewReportClient(logger, *baseUrl)
-	_ = reportCli
+
 	if err != nil {
 		logger.Error("error init report client")
 		done <- 1
@@ -40,8 +41,10 @@ func main() {
 
 	repo := store.NewReportStore(logger)
 	logger.Info("start scheduler")
+
 	generator := runners.NewReportGenerator(repo, reportCli, *parallelClients, logger)
-	scheduler := scheduler.NewScheduler(logger, generator)
+	downloader := runners.NewDownloader(repo, reportCli, logger)
+	scheduler := scheduler.NewScheduler(logger, *frequency, generator, downloader)
 
 	go graceful(logger, done, []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP, os.Interrupt}, reportCli, scheduler)
 	<-done

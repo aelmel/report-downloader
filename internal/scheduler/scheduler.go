@@ -12,21 +12,19 @@ type Scheduler interface {
 }
 
 type scheduler struct {
-	c *cron.Cron
+	c      *cron.Cron
+	logger *logrus.Logger
 }
 
-func NewScheduler(logger *logrus.Logger, runners ...runners.Runner) Scheduler {
+func NewScheduler(logger *logrus.Logger, frequency string, runners ...runners.Runner) Scheduler {
 	c := cron.New()
 
-	cron.WithLogger(cron.VerbosePrintfLogger(logger))
-
 	for _, runner := range runners {
-		c.AddFunc("*/1 * * * *", runner.Execute)
+		c.AddFunc(frequency, runner.Execute)
 	}
-
 	c.Start()
 
-	return &scheduler{c: c}
+	return &scheduler{c: c, logger: logger}
 }
 
 func (s *scheduler) Close() error {

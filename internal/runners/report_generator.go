@@ -31,7 +31,7 @@ func (g *generator) Execute() {
 		go func() {
 			reportId, err := g.reportClient.GenerateReport(context.Background())
 			if err != nil {
-				g.logger.Warnf("error generating report %s", err.Error())
+				g.logger.Warnf("error generating report")
 				return
 			}
 			g.repo.AddReport(reportId)

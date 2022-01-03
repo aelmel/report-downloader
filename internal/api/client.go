@@ -13,6 +13,7 @@ import (
 
 type Client interface {
 	SendRequest(req *http.Request) (Response, error)
+	SendDownloadRequest(req *http.Request) (*http.Response, error)
 	Close() error
 }
 
@@ -54,6 +55,19 @@ func (c *client) SendRequest(req *http.Request) (apiResp Response, err error) {
 	}
 
 	return apiResp, nil
+}
+
+func (c *client) SendDownloadRequest(req *http.Request) (*http.Response, error) {
+	response, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("failed to send request, error %s", err))
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return nil, errors.New(fmt.Sprintf("error status code %d", response.StatusCode))
+	}
+
+	return response, err
 }
 
 func (c *client) Close() error {
