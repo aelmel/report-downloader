@@ -42,10 +42,11 @@ func main() {
 	repo := store.NewReportStore(logger)
 	logger.Info("start scheduler")
 
-	generator := runners.NewReportGenerator(repo, reportCli, *parallelClients, logger)
-	downloader := runners.NewDownloader(repo, reportCli, logger)
+	reportCh := store.NewReportChannel()
+	generator := runners.NewReportGenerator(reportCh, reportCli, *parallelClients, logger)
+	downloader := runners.NewDownloader(repo, reportCh, reportCli, logger)
 	scheduler := scheduler.NewScheduler(logger, *frequency, generator, downloader)
 
-	go graceful(logger, done, []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP, os.Interrupt}, reportCli, scheduler)
+	go graceful(logger, done, []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP, os.Interrupt}, reportCli, scheduler, reportCh)
 	<-done
 }

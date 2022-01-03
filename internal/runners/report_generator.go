@@ -11,15 +11,15 @@ import (
 
 type generator struct {
 	reportClient report.Client
-	repo         store.ReportStore
+	reportCh     store.Channel
 	parallel     int
 	logger       *logrus.Logger
 }
 
-func NewReportGenerator(store store.ReportStore, client report.Client, parallel int, logger *logrus.Logger) Runner {
+func NewReportGenerator(reportCh store.Channel, client report.Client, parallel int, logger *logrus.Logger) Runner {
 	return &generator{
 		reportClient: client,
-		repo:         store,
+		reportCh:     reportCh,
 		parallel:     parallel,
 		logger:       logger,
 	}
@@ -34,7 +34,7 @@ func (g *generator) Execute() {
 				g.logger.Warnf("error generating report")
 				return
 			}
-			g.repo.AddReport(reportId)
+			g.reportCh.AddReport(reportId)
 		}()
 	}
 }

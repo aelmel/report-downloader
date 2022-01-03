@@ -2,9 +2,9 @@ package scheduler
 
 import (
 	"github.com/aelmel/report-downloader/internal/runners"
-	"github.com/sirupsen/logrus"
 
 	"github.com/robfig/cron/v3"
+	"github.com/sirupsen/logrus"
 )
 
 type Scheduler interface {

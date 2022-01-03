@@ -17,6 +17,7 @@ type downloader struct {
 	reportClient report.Client
 	repo         store.ReportStore
 	logger       *logrus.Logger
+	reportCh     store.Channel
 }
 
 var backoffSchedule = []time.Duration{
@@ -28,12 +29,16 @@ var backoffSchedule = []time.Duration{
 	10 * time.Second,
 }
 
-func NewDownloader(store store.ReportStore, client report.Client, logger *logrus.Logger) Runner {
-	return &downloader{
+func NewDownloader(store store.ReportStore, reportCh store.Channel, client report.Client, logger *logrus.Logger) Runner {
+	d := &downloader{
 		reportClient: client,
+		reportCh:     reportCh,
 		repo:         store,
 		logger:       logger,
 	}
+
+	go d.handleReports()
+	return d
 }
 
 func (d *downloader) Execute() {
@@ -90,4 +95,19 @@ func (d *downloader) saveReport(url, reportId string) error {
 	}
 
 	return nil
+}
+
+func (d *downloader) handleReports() {
+	for reportId := range d.reportCh.GetReportChannel() {
+		d.logger.Debugf("got report id %s", reportId)
+		go func(reportId string) {
+			url, err := d.getReportUrl(reportId)
+			if err != nil {
+				d.logger.Warnf("error geting report url %s", reportId)
+				d.repo.AddReport(reportId)
+				return
+			}
+			_ = d.saveReport(url, reportId)
+		}(reportId)
+	}
 }

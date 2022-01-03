@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"os/signal"
+
+	"github.com/sirupsen/logrus"
 )
 
 func graceful(logger *logrus.Logger, done chan int, signals []os.Signal, services ...io.Closer) {
