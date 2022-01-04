@@ -54,7 +54,7 @@ func (c *client) GenerateReport(ctx context.Context) (reportId string, err error
 		return reportId, err
 	}
 
-	return resp.ReportId, nil
+	return fmt.Sprintf("%d", resp.ReportId), nil
 }
 
 func (c *client) GetReport(ctx context.Context, reportId string) (string, string, error) {
