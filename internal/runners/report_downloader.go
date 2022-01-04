@@ -2,6 +2,7 @@ package runners
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -52,12 +53,18 @@ func (d *downloader) Execute() {
 				d.logger.Warnf("could not get report address %s", err.Error())
 				return
 			}
-			_ = d.saveReport(url, id)
+			file, err := d.saveReport(url, id)
+			if err != nil {
+				d.logger.Warnf("couldn't save report for reportId %s", id)
+				return
+			}
+			d.logger.Infof("saved file %s report id %s", file, id)
 		}(id)
 	}
 }
 
 func (d *downloader) getReportUrl(id string) (url string, err error) {
+
 	for _, backoff := range backoffSchedule {
 		url, status, err := d.reportClient.GetReport(context.Background(), id)
 		if err != nil {
@@ -65,27 +72,29 @@ func (d *downloader) getReportUrl(id string) (url string, err error) {
 			return url, err
 		}
 		if status == "done" {
-			break
+			return url, nil
 		}
+		d.logger.Infof("get report id %s go status %s", id, status)
 		time.Sleep(backoff)
 	}
 
-	return url, nil
+	return "", errors.New("retries attempts exceeded")
 }
 
-func (d *downloader) saveReport(url, reportId string) error {
+func (d *downloader) saveReport(url, reportId string) (string, error) {
 	resp, err := d.reportClient.DownloadReport(url)
 	if err != nil {
 		d.logger.Warnf("error %s downloading report %s", url, err.Error())
-		return err
+		return "", err
 	}
 
 	now := time.Now().Format("2006_01_02_15_04_05")
-	out, err := os.Create(fmt.Sprintf("%s/%s_%s", os.TempDir(), now, reportId))
+	fileLocation := fmt.Sprintf("%s/%s_%s", os.TempDir(), now, reportId)
+	out, err := os.Create(fileLocation)
 
 	if err != nil {
 		d.logger.Warnf("error on file create %s", err.Error())
-		return err
+		return "", err
 	}
 	defer out.Close()
 	defer resp.Body.Close()
@@ -94,7 +103,7 @@ func (d *downloader) saveReport(url, reportId string) error {
 		d.logger.Warnf("error %s copying resp to file ", err.Error())
 	}
 
-	return nil
+	return fileLocation, nil
 }
 
 func (d *downloader) handleReports() {
@@ -107,7 +116,8 @@ func (d *downloader) handleReports() {
 				d.repo.AddReport(reportId)
 				return
 			}
-			_ = d.saveReport(url, reportId)
+			file, err := d.saveReport(url, reportId)
+			d.logger.Infof("save report to file %s id %s", file, reportId)
 		}(reportId)
 	}
 }
