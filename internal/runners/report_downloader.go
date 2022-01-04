@@ -89,7 +89,7 @@ func (d *downloader) saveReport(url, reportId string) (string, error) {
 	}
 
 	now := time.Now().Format("2006_01_02_15_04_05")
-	fileLocation := fmt.Sprintf("%s/%s_%s", os.TempDir(), now, reportId)
+	fileLocation := fmt.Sprintf("%s/%s_%s.csv", os.TempDir(), now, reportId)
 	out, err := os.Create(fileLocation)
 
 	if err != nil {
