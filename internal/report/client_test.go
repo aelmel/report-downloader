@@ -30,7 +30,7 @@ func setup(t *testing.T) (*client, *mock_api.MockClient, func()) {
 
 	reportClient := &client{
 		logger:  log,
-		baseUrl: bUrl,
+		baseURL: bUrl,
 		api:     apiClient,
 	}
 
@@ -48,8 +48,8 @@ func TestClient_GenerateReport_SuccessRequest(t *testing.T) {
 	reportId := 99999
 	resp := api.Response{
 		Status:    "done",
-		ReportUrl: "",
-		ReportId:  reportId,
+		ReportURL: "",
+		ReportID:  reportId,
 		Error:     "",
 	}
 	apiClient.EXPECT().SendRequest(gomock.Eq(request)).Return(resp, nil).Times(1)
@@ -83,8 +83,8 @@ func TestClient_GetReport(t *testing.T) {
 	assert.Nil(t, err)
 	resp := api.Response{
 		Status:    "pending",
-		ReportUrl: "",
-		ReportId:  reportId,
+		ReportURL: "",
+		ReportID:  reportId,
 		Error:     "",
 	}
 	apiClient.EXPECT().SendRequest(gomock.Eq(request)).Return(resp, nil).Times(1)

@@ -81,7 +81,7 @@ func (d *downloader) getReportUrl(id string) (url string, err error) {
 	return "", errors.New("retries attempts exceeded")
 }
 
-func (d *downloader) saveReport(url, reportId string) (string, error) {
+func (d *downloader) saveReport(url, reportID string) (string, error) {
 	resp, err := d.reportClient.DownloadReport(url)
 	if err != nil {
 		d.logger.Warnf("error %s downloading report %s", url, err.Error())
@@ -89,7 +89,7 @@ func (d *downloader) saveReport(url, reportId string) (string, error) {
 	}
 
 	now := time.Now().Format("2006_01_02_15_04_05")
-	fileLocation := fmt.Sprintf("%s/%s_%s.csv", os.TempDir(), now, reportId)
+	fileLocation := fmt.Sprintf("%s/%s_%s.csv", os.TempDir(), now, reportID)
 	out, err := os.Create(fileLocation)
 
 	if err != nil {

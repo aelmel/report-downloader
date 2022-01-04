@@ -15,7 +15,7 @@ import (
 
 func main() {
 	var (
-		baseUrl         = flag.String("API_URL", "http://localhost:12345", "api host")
+		baseURL         = flag.String("API_URL", "http://localhost:12345", "api host")
 		parallelClients = flag.Int("API_CLIENTS", 2, "parallel clients for report generator")
 		frequency       = flag.String("GENERATE_FREQUENCY", "*/1 * * * *", "frequency calling report generator")
 	)
@@ -32,7 +32,7 @@ func main() {
 		FullTimestamp: true,
 	})
 
-	reportCli, err := report.NewReportClient(logger, *baseUrl)
+	reportCli, err := report.NewReportClient(logger, *baseURL)
 
 	if err != nil {
 		logger.Error("error init report client")

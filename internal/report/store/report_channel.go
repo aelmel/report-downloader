@@ -1,7 +1,7 @@
 package store
 
 type Channel interface {
-	AddReport(reportId string)
+	AddReport(reportID string)
 	GetReportChannel() chan string
 	Close() error
 }
@@ -15,8 +15,8 @@ func NewReportChannel() Channel {
 	return &channel{reportCh: reportCh}
 }
 
-func (c *channel) AddReport(reportId string) {
-	c.reportCh <- reportId
+func (c *channel) AddReport(reportID string) {
+	c.reportCh <- reportID
 }
 
 func (c *channel) GetReportChannel() chan string {

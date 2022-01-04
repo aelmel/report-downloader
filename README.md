@@ -9,3 +9,5 @@ Can configure app using args or env variables
 * API_CLIENTS        - number of clients to call report generation tool (default: 2)
 * GENERATE_FREQUENCY - cron expression to run generate api (default: */1 * * * *)
 
+### File Format
+The report is renamed format name 2006_01_02_15_04_05_{reportID}.csv

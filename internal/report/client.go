@@ -21,44 +21,44 @@ type Client interface {
 type client struct {
 	logger *logrus.Logger
 
-	baseUrl *url.URL
+	baseURL *url.URL
 	api     api.Client
 }
 
 func NewReportClient(logger *logrus.Logger, baseUrl string) (Client, error) {
 	bUrl, err := url.Parse(baseUrl)
 	if err != nil {
-		logger.Errorf("error parsing baseUrl %s", err.Error())
+		logger.Errorf("error parsing baseURL %s", err.Error())
 		return nil, err
 	}
 	apiClient := api.NewClient(logger)
 	return &client{
 		logger:  logger,
-		baseUrl: bUrl,
+		baseURL: bUrl,
 		api:     apiClient,
 	}, err
 }
 
-func (c *client) GenerateReport(ctx context.Context) (reportId string, err error) {
+func (c *client) GenerateReport(ctx context.Context) (reportID string, err error) {
 	path := c.buildUrl("/generation/report-requests")
 	req, err := http.NewRequest("POST", path, nil)
 	if err != nil {
 		c.logger.Warnf("could not create request %v", err)
-		return reportId, err
+		return reportID, err
 	}
 
 	req = req.WithContext(ctx)
 	resp, err := c.api.SendRequest(req)
 	if err != nil {
 		c.logger.Warnf("Error received from api %s", err.Error())
-		return reportId, err
+		return reportID, err
 	}
 
-	return fmt.Sprintf("%d", resp.ReportId), nil
+	return fmt.Sprintf("%d", resp.ReportID), nil
 }
 
-func (c *client) GetReport(ctx context.Context, reportId string) (string, string, error) {
-	path := c.buildUrl(fmt.Sprintf("generation/reports/%s", reportId))
+func (c *client) GetReport(ctx context.Context, reportID string) (string, string, error) {
+	path := c.buildUrl(fmt.Sprintf("generation/reports/%s", reportID))
 	req, err := http.NewRequest("GET", path, nil)
 	if err != nil {
 		c.logger.Warnf("could not create request %v", err)
@@ -72,7 +72,7 @@ func (c *client) GetReport(ctx context.Context, reportId string) (string, string
 		return "", "", err
 	}
 
-	return resp.ReportUrl, resp.Status, nil
+	return resp.ReportURL, resp.Status, nil
 }
 
 func (c *client) DownloadReport(reportAddress string) (*http.Response, error) {
@@ -86,7 +86,7 @@ func (c *client) DownloadReport(reportAddress string) (*http.Response, error) {
 }
 
 func (c *client) buildUrl(resource string) string {
-	base := *c.baseUrl
+	base := *c.baseURL
 	base.Path += resource
 	return base.String()
 }

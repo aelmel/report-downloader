@@ -29,12 +29,12 @@ func (g *generator) Execute() {
 	g.logger.Info("generate report")
 	for i := 0; i < g.parallel; i++ {
 		go func() {
-			reportId, err := g.reportClient.GenerateReport(context.Background())
+			reportID, err := g.reportClient.GenerateReport(context.Background())
 			if err != nil {
 				g.logger.Warnf("error generating report")
 				return
 			}
-			g.reportCh.AddReport(reportId)
+			g.reportCh.AddReport(reportID)
 		}()
 	}
 }
